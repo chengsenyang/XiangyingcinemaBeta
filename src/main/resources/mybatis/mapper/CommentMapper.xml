@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.xiangyingcinema.mapper.CommentMapper" >
+
+    <!--//获取相关 留言或者 评论-->
+    <select id="getComment" parameterType="String" resultType="com.example.xiangyingcinema.pojo.Comment">
+        select * from comment where flagid = #{v} and superiorid = '0' and cmflag = "1"order by cmtime desc
+    </select>
+
+    <!--//获取子评论-->
+    <select id="getSonComment" parameterType="String" resultType="com.example.xiangyingcinema.pojo.Comment">
+        select * from comment where superiorid = #{v} and cmflag = "1";
+    </select>
+
+    <!--//获取最新评论-->
+    <select id="getNewComment" resultType="com.example.xiangyingcinema.pojo.Comment">
+        select cmname ,cmcontext,cmtime from comment where cmflag = 1 order by cmtime desc limit 10;
+    </select>
+
+
+
+    <!--增新评论-->
+    <select id="addComment" parameterType="com.example.xiangyingcinema.pojo.Comment">
+        insert into comment values (
+          #{cmid},#{flagid},#{cmimage},#{cmname},#{cmcontext},#{cmtime},
+          #{cmflag},#{superiorid},#{superiorname},#{cmemail});
+
+    </select>
+
+
+    <!--//**************************************后台功能***********************************************-->
+    <!--//根据条件获取相对应的数据 flag 0 ：评论  1 ： 留言 2 ： 全部  3：未处理的-->
+    <select id="getCommentBycondition" parameterType="String" resultType="com.example.xiangyingcinema.pojo.Comment">
+        select
+        blog.btitle, comment.cmname, comment.cmcontext,  comment.cmtime,comment.flagid,comment.cmid,comment.cmemail,
+        comment.superiorid
+        from comment left join blog on comment.flagid=blog.bid
+        <if test=' _parameter == "0" '>
+            where flagid != "538764e7-af76-40bd-819a-cb9fa0b43904"
+        </if>
+        <if test=' _parameter == "1" '>
+            where flagid = "538764e7-af76-40bd-819a-cb9fa0b43904"
+        </if>
+        <if test=' _parameter == "3" '>
+            where cmflag = '0'
+        </if>
+        order by cmtime desc
+    </select>
+
+
+    <!--// 删除评论-->
+    <delete id="deleteComment" parameterType="String">
+        delete from comment where cmid = #{cmid};
+    </delete>
+
+    <!--//留言成功-->
+    <update id="agreeComment" parameterType="String">
+        update comment set cmflag = "1" where cmid = #{cmid};
+    </update>
+
+    <!--//获取单一的留言-->
+    <select id="getSingleComment" parameterType="String" resultType="com.example.xiangyingcinema.pojo.Comment">
+        select * from comment where cmid = #{cmid};
+    </select>
+
+
+</mapper>
